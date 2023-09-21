@@ -1,61 +1,54 @@
 #!/usr/bin/python3
-"""N Queens placement on NxN chessboard"""
-
+"""
+N queens
+"""
 
 import sys
 
+if len(sys.argv) != 2:
+    print('Usage: nqueens N')
+    exit(1)
 
-def generate_solutions(row, column):
-    solution = [[]]
-    for queen in range(row):
-        solution = place_queen(queen, column, solution)
-    return solution
+try:
+    n_q = int(sys.argv[1])
+except ValueError:
+    print('N must ba a number')
+    exit(1)
 
-
-def place_queen(queen, column, prev_solution):
-    safe_position = []
-    for array in prev_solution:
-        for x in range(column):
-            if is_safe(queen, x, array):
-                safe_position.append(array + [x])
-    return safe_position
+if n_q < 4:
+    print('N must ba at least 4')
+    exit(1)
 
 
-def is_safe(q, x, array):
-    if x in array:
-        return (False)
-    else:
-        return all(abs(array[column] - x) != q - column
-                   for column in range(q))
+def solve_nqueens(n):
+    ''' self descriptive '''
+    if n == 0:
+        return [[]]
+    inner_solution = solve_nqueens(n - 1)
+    return [solution + [(n, i + 1)]
+            for i in range(n_q)
+            for solution in inner_solution
+            if safe_queen((n, i + 1), solution)]
 
 
-def init():
-    if len(sys.argv) != 2:
-        print("Usage: nqueens N")
-        sys.exit(1)
-    if sys.argv[1].isdigit():
-        n = int(sys.argv[1])
-    else:
-        print("N must be a number")
-        sys.exit(1)
-    if n < 4:
-        print("N must be at least 4")
-        sys.exit(1)
-    return (n)
+def attack_queen(square, queen):
+    '''self descriptive'''
+    (row1, col1) = square
+    (row2, col2) = queen
+    return (row1 == row2) or (col1 == col2) or\
+        abs(row1 - row2) == abs(col1 - col2)
 
 
-def n_queens():
-
-    n = init()
-    # generate all solutions
-    solutions = generate_solutions(n, n)
-    # print solutions
-    for array in solutions:
-        clean = []
-        for q, x in enumerate(array):
-            clean.append([q, x])
-        print(clean)
+def safe_queen(sqr, queens):
+    '''self descriptive'''
+    for queen in queens:
+        if attack_queen(sqr, queen):
+            return False
+    return True
 
 
-if __name__ == '__main__':
-    n_queens()
+for answer in reversed(solve_nqueens(n_q)):
+    result = []
+    for p in [list(p) for p in answer]:
+        result.append([i - 1 for i in p])
+    print(result)
